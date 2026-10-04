@@ -1,0 +1,12 @@
+.header {
+  text-align: center;
+  font-size: 30px;
+}
+
+mat-dialog-content {
+  text-align: center;
+}
+
+mat-form-field {
+  width: 100%;
+}

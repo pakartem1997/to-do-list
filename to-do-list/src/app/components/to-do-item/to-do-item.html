@@ -19,6 +19,7 @@
   <input
     #statusCheckbox
     class="cursor-pointer"
+    app-checkbox
     type="checkbox"
     [(ngModel)]="isCompleted"
     [appTooltip]="isCompleted() ? returnToProgress : completeTask"

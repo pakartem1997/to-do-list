@@ -1,1 +1,65 @@
-<p>to-do-sign-in works!</p>
+<form #registrationForm="ngForm" (ngSubmit)="signIn()">
+  <h3 mat-dialog-title class="header">Login</h3>
+
+  <mat-dialog-content>
+    <mat-form-field>
+      <mat-label>Enter your email</mat-label>
+      <input
+        matInput
+        type="email"
+        name="email"
+        placeholder="pat@example.com"
+        [(ngModel)]="model.email"
+        #email="ngModel"
+        required
+        email
+      />
+      @if (email.invalid && email.touched) {
+        @if (email.errors?.['required']) {
+          <mat-error>You must enter a value</mat-error>
+        }
+
+        @if (email.errors?.['email']) {
+          <mat-error>Not a valid email</mat-error>
+        }
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Enter your password</mat-label>
+      <input
+        matInput
+        name="password"
+        [(ngModel)]="model.password"
+        #password="ngModel"
+        [type]="hide() ? 'password' : 'text'"
+        required
+        minlength="6"
+      />
+      <button
+        matIconButton
+        type="button"
+        matSuffix
+        (click)="clickEvent($event)"
+        [attr.aria-label]="'Hide password'"
+        [attr.aria-pressed]="hide()"
+      >
+        <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      @if (password.invalid && password.touched) {
+        @if (password.errors?.['required']) {
+          <mat-error>Password is required</mat-error>
+        }
+
+        @if (password.errors?.['minlength']) {
+          <mat-error> Password must be at least 6 characters </mat-error>
+        }
+      }
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button matButton mat-dialog-close type="button">Cancel</button>
+    <button matButton cdkFocusInitial type="submit">Login</button>
+  </mat-dialog-actions>
+</form>

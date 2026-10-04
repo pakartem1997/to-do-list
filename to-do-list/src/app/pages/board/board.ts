@@ -11,6 +11,7 @@ import { Task } from '../../interfaces/task.interface';
 import { forkJoin, take } from 'rxjs';
 import { TodoStore } from '../../services/todo-store';
 import { ToastService } from '../../services/toast';
+import { Supabase } from '../../services/supabase';
 
 @Component({
   selector: 'app-board',
@@ -19,15 +20,16 @@ import { ToastService } from '../../services/toast';
   styleUrl: './board.css',
 })
 export class Board implements OnInit {
-  private readonly todoStore = inject(TodoStore);
+  // private readonly todoStore = inject(TodoStore);
   private readonly toastService = inject(ToastService);
+  private readonly supabase = inject(Supabase);
 
   statuses: TodoStatus[] = ['ToDo', 'InProgress', 'Completed'];
 
-  tasks = this.todoStore.tasks;
+  tasks = this.supabase.tasks;
 
   ngOnInit() {
-    this.todoStore.getTasks().pipe(take(1)).subscribe();
+    this.supabase.getTasks().pipe(take(1)).subscribe();
   }
 
   columns = computed(() =>
@@ -48,7 +50,7 @@ export class Board implements OnInit {
         order: index,
       }));
 
-      this.todoStore
+      this.supabase
         .changeTaskOrder(currentTasks)
         .pipe(take(1))
         .subscribe({
@@ -59,7 +61,7 @@ export class Board implements OnInit {
             this.toastService.showToast(
               $localize`:@@taskOrderUpdateError:Failed to update task order!`,
             );
-            this.todoStore.reloadTasks().pipe(take(1)).subscribe();
+            // this.supabase.reloadTasks().pipe(take(1)).subscribe();
           },
         });
 
@@ -87,9 +89,9 @@ export class Board implements OnInit {
     const newStatus = event.container.id as TodoStatus;
 
     forkJoin([
-      this.todoStore.changeTaskOrder([...previousTasks, ...currentTasks]),
+      this.supabase.changeTaskOrder([...previousTasks, ...currentTasks]),
 
-      this.todoStore.changeTaskStatus(task.id, newStatus),
+      this.supabase.changeTaskStatus(task.id, newStatus),
     ])
       .pipe(take(1))
       .subscribe({
@@ -100,7 +102,7 @@ export class Board implements OnInit {
           this.toastService.showToast(
             $localize`:@@taskOrderUpdateError:Failed to update task order!`,
           );
-          this.todoStore.reloadTasks().pipe(take(1)).subscribe();
+          // this.supabase.reloadTasks().pipe(take(1)).subscribe();
         },
       });
   }

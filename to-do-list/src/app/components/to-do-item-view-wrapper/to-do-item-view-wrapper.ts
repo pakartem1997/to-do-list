@@ -8,6 +8,7 @@ import { ToDoErrorState } from '../to-do-error-state/to-do-error-state';
 import { ToastService } from '../../services/toast';
 import { TodoStatus } from '../../type/todo-status.type';
 import { TodoStore } from '../../services/todo-store';
+import { Supabase } from '../../services/supabase';
 
 @Component({
   selector: 'app-to-do-item-view-wrapper',
@@ -17,10 +18,11 @@ import { TodoStore } from '../../services/todo-store';
 })
 export class ToDoItemViewWrapper {
   private readonly route = inject(ActivatedRoute);
-  private readonly todoStore = inject(TodoStore);
+  // private readonly todoStore = inject(TodoStore);
+  private readonly supabase = inject(Supabase);
   private readonly toastService = inject(ToastService);
 
-  readonly tasks = this.todoStore.tasks;
+  readonly tasks = this.supabase.tasks;
 
   taskId = toSignal(
     this.route.paramMap.pipe(
@@ -53,7 +55,7 @@ export class ToDoItemViewWrapper {
   onStatusChange(id: number, checked: boolean): void {
     const newStatus: TodoStatus = checked ? 'Completed' : 'InProgress';
 
-    this.todoStore
+    this.supabase
       .changeTaskStatus(id, newStatus)
       .pipe(take(1))
       .subscribe({
@@ -63,7 +65,7 @@ export class ToDoItemViewWrapper {
               ? $localize`:@@taskCompleted:Task completed!`
               : $localize`:@@taskReturnedToProgress:Task returned to progress!`,
           ),
-        error: () => this.todoStore.reloadTasks().pipe(take(1)),
+        error: () => console.log('error'),
       });
   }
 }

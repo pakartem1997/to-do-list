@@ -41,7 +41,7 @@ export class ToDoRegistration {
   model = {
     email: '',
     password: '',
-    displayName: '',
+    username: '',
   };
 
   hide = signal(true);
@@ -51,16 +51,12 @@ export class ToDoRegistration {
     event.stopPropagation();
   }
 
-   async registration(): Promise<void> {
+  async registration(): Promise<void> {
     const email = this.model.email.trim();
     const password = this.model.password.trim();
-    const displayName = this.model.displayName.trim();
+    const username = this.model.username.trim();
 
-    const { data, error } = await this.supabase.signUp(
-      email,
-      password,
-      displayName,
-    );
+    const { data, error } = await this.supabase.signUp(email, password, username);
 
     if (error) {
       console.error('Ошибка регистрации:', error);

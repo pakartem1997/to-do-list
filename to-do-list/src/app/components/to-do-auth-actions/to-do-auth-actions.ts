@@ -3,11 +3,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { ToDoRegistration } from '../to-do-registration/to-do-registration';
 import { MatButtonModule } from '@angular/material/button';
 import { ToDoSignIn } from '../to-do-sign-in/to-do-sign-in';
-import { AuthService } from '../../services/auth-service';
+import { AuthService } from '../../services/auth';
+import { ToDoUserAvatar } from '../to-do-user-avatar/to-do-user-avatar';
 
 @Component({
   selector: 'app-to-do-auth-actions',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, ToDoUserAvatar],
   templateUrl: './to-do-auth-actions.html',
   styleUrl: './to-do-auth-actions.css',
 })

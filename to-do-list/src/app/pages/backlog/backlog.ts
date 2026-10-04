@@ -10,6 +10,7 @@ import { MatSelect, MatOption } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { TodoStore } from '../../services/todo-store';
 import { take } from 'rxjs';
+import { Supabase } from '../../services/supabase';
 
 @Component({
   selector: 'app-backlog',
@@ -29,7 +30,8 @@ import { take } from 'rxjs';
   styleUrl: './backlog.css',
 })
 export class Backlog implements OnInit {
-  private readonly todoStore = inject(TodoStore);
+  // private readonly todoStore = inject(TodoStore);
+  private readonly supabase = inject(Supabase);
   private readonly toastService = inject(ToastService);
 
   selectedStatus = signal<TodoStatus | null>(null);
@@ -41,11 +43,11 @@ export class Backlog implements OnInit {
     { value: 'Completed', viewValue: $localize`:@@completedStatus:Completed` },
   ];
 
-  tasks = this.todoStore.tasks;
-  isLoading = this.todoStore.isLoading;
+  tasks = this.supabase.tasks;
+  isLoading = this.supabase.isLoading;
 
   ngOnInit() {
-    this.todoStore
+    this.supabase
       .getTasks()
       .pipe(take(1))
       .subscribe({
@@ -67,7 +69,7 @@ export class Backlog implements OnInit {
   });
 
   deleteTask(id: number) {
-    this.todoStore
+    this.supabase
       .deleteTask(id)
       .pipe(take(1))
       .subscribe({
@@ -78,7 +80,7 @@ export class Backlog implements OnInit {
   }
 
   changeStatus(id: number, status: TodoStatus) {
-    this.todoStore
+    this.supabase
       .changeTaskStatus(id, status)
       .pipe(take(1))
       .subscribe({
@@ -91,7 +93,7 @@ export class Backlog implements OnInit {
           );
         },
         error: () => {
-          this.todoStore.reloadTasks().subscribe();
+          // this.supabase.reloadTasks().subscribe();
           this.toastService.showToast(
             $localize`:@@statusUpdateError:Failed to update task status!`,
           );

@@ -3,6 +3,19 @@
 
   <mat-dialog-content>
     <mat-form-field>
+      <mat-label>Username</mat-label>
+      <input
+        matInput
+        type="text"
+        name="username"
+        placeholder="Your name"
+        [(ngModel)]="model.username"
+        #username="ngModel"
+        required
+      />
+    </mat-form-field>
+
+    <mat-form-field>
       <mat-label>Enter your email</mat-label>
       <input
         matInput

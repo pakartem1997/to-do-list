@@ -1,17 +1,10 @@
 <div class="auth-actions">
-  @if (authService.user(); as user) {
-    <span>Вы вошли как {{ user.email }}</span>
-
-    <button matButton (click)="logout()">
-      Выйти
-    </button>
+  @if (authService.displayName(); as displayName) {
+    <app-to-do-user-avatar [name]="displayName" />
+    <span>{{ displayName }}</span>
+    <button matButton (click)="logout()">Выйти</button>
   } @else {
-    <button mat-button type="button" (click)="openLogin()">
-      Войти
-    </button>
-
-    <button mat-flat-button type="button" (click)="openRegistration()">
-      Регистрация
-    </button>
+    <button mat-button type="button" (click)="openLogin()">Войти</button>
+    <button mat-flat-button type="button" (click)="openRegistration()">Регистрация</button>
   }
 </div>

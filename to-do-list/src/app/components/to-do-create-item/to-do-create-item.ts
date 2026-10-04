@@ -11,6 +11,7 @@ import { ToDoButton } from '../to-do-button/to-do-button';
 import { take } from 'rxjs';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { TaskMember } from '../../interfaces/roles.interface';
+import { Supabase } from '../../services/supabase';
 
 @Component({
   selector: 'app-to-do-create-item',
@@ -29,6 +30,7 @@ import { TaskMember } from '../../interfaces/roles.interface';
 export class ToDoCreateItem {
   private readonly todoStore = inject(TodoStore);
   private readonly toastService = inject(ToastService);
+  private supabase = inject(Supabase);
 
   model: {
     title: string;
@@ -68,7 +70,7 @@ export class ToDoCreateItem {
     const description = (this.model.description || '').trim();
     const roles = this.model.roles || '';
 
-    this.todoStore
+    this.supabase
       .addTask(title, description, roles)
       .pipe(take(1))
       .subscribe({
