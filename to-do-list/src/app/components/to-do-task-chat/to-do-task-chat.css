@@ -3,6 +3,7 @@
   flex-direction: column;
   background-color: var(--bg-main);
   border-radius: 10px;
+  height: 600px;
 }
 
 .chat-header {
@@ -26,18 +27,28 @@
 }
 
 .chat-body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  height: 500px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-body mat-tab-group {
+  flex: 1;
+  min-height: 0;
+}
+
+.chat-body ::ng-deep .mat-mdc-tab-body-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.chat-body ::ng-deep .mat-mdc-tab-body-content {
+  height: 100%;
 }
 
 .example-tab-icon {
   margin-right: 5px;
-}
-
-.tab-content {
-  padding-inline: 10px;
-  padding-top: 10px;
 }
 
 .btn-close,
@@ -58,8 +69,23 @@
   flex: 1;
 }
 
-.chat-footer {
-  padding: 15px;
-  flex-shrink: 0;
-  border-top: 1px solid #5e5e5e;
+app-to-do-chat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.tab-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.chat-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }

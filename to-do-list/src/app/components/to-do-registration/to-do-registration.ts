@@ -12,6 +12,7 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput, MatSuffix } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { Supabase } from '../../services/supabase';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-to-do-registration',
@@ -36,7 +37,7 @@ import { Supabase } from '../../services/supabase';
 })
 export class ToDoRegistration {
   readonly dialogRef = inject(MatDialogRef<ToDoRegistration>);
-  private supabase = inject(Supabase);
+  private readonly authService = inject(AuthService);
 
   model = {
     email: '',
@@ -47,8 +48,8 @@ export class ToDoRegistration {
   hide = signal(true);
 
   clickEvent(event: MouseEvent) {
-    this.hide.set(!this.hide());
     event.stopPropagation();
+    this.hide.set(!this.hide());
   }
 
   async registration(): Promise<void> {
@@ -56,7 +57,7 @@ export class ToDoRegistration {
     const password = this.model.password.trim();
     const username = this.model.username.trim();
 
-    const { data, error } = await this.supabase.signUp(email, password, username);
+    const { data, error } = await this.authService.signUp(email, password, username);
 
     if (error) {
       console.error('Ошибка регистрации:', error);

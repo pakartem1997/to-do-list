@@ -1,6 +1,8 @@
 import { Roles } from '../type/roles.type';
 
 export interface TaskMember {
-  userId: number | null;
+  userId: string | null;
   role: Roles | null;
+  username?: string;
+  avatarUrl?: string;
 }

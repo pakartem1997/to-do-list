@@ -14,12 +14,12 @@
     <ul class="list">
       @for (task of filteredTasks(); track task.id) {
         <li
-          appToDoItem
+          app-to-do-item
           tabindex="0"
           appTooltip="Show description"
           i18n-appTooltip="@@showDescription"
-          [routerLink]="['/backlog', task.id]"
           routerLinkActive="selected"
+          [routerLink]="['/backlog', task.id]"
           [task]="task"
           (delete)="deleteTask(task.id)"
           (statusChange)="changeStatus(task.id, $event)"

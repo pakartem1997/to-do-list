@@ -8,20 +8,20 @@
           matInput
           placeholder="Add your new todo"
           i18n-placeholder="@@addTodoPlaceholder"
-          [(ngModel)]="model.title"
           required
+          [(ngModel)]="model.title"
         />
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <textarea
+          #autosize="cdkTextareaAutosize"
           class="description-input"
           name="description"
           matInput
           placeholder="Description"
           i18n-placeholder="@@descriptionPlaceholder"
           cdkTextareaAutosize
-          #autosize="cdkTextareaAutosize"
           [(ngModel)]="model.description"
         ></textarea>
       </mat-form-field>
@@ -48,8 +48,8 @@
           <button
             type="button"
             class="member-row__remove"
-            (click)="removeRole($index)"
             aria-label="Remove member"
+            (click)="removeRole($index)"
           >
             ×
           </button>
@@ -57,22 +57,23 @@
           <mat-form-field appearance="outline">
             <mat-label>Role</mat-label>
 
-            <mat-select [name]="'role-' + $index" [(ngModel)]="role.role">
+            <mat-select required [name]="'role-' + $index" [(ngModel)]="role.role">
               <mat-option value="Creator">Creator</mat-option>
               <mat-option value="Responsible">Responsible</mat-option>
               <mat-option value="Assignee">Assignee</mat-option>
               <mat-option value="Reviewer">Reviewer</mat-option>
               <mat-option value="Tester">Tester</mat-option>
+              <mat-option value="Executor">Executor</mat-option>
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>User</mat-label>
 
-            <mat-select [name]="'user-' + $index" [(ngModel)]="role.userId">
-              @for (user of users; track user.id) {
+            <mat-select required [name]="'user-' + $index" [(ngModel)]="role.userId">
+              @for (user of users(); track user.id) {
                 <mat-option [value]="user.id">
-                  {{ user.name }}
+                  {{ user.username }}
                 </mat-option>
               }
             </mat-select>

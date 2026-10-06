@@ -5,27 +5,27 @@
     <mat-form-field>
       <mat-label>Username</mat-label>
       <input
+        #username="ngModel"
         matInput
         type="text"
         name="username"
         placeholder="Your name"
-        [(ngModel)]="model.username"
-        #username="ngModel"
         required
+        [(ngModel)]="model.username"
       />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Enter your email</mat-label>
       <input
+        #email="ngModel"
         matInput
         type="email"
         name="email"
         placeholder="pat@example.com"
-        [(ngModel)]="model.email"
-        #email="ngModel"
         required
         email
+        [(ngModel)]="model.email"
       />
       @if (email.invalid && email.touched) {
         @if (email.errors?.['required']) {
@@ -41,21 +41,21 @@
     <mat-form-field>
       <mat-label>Enter your password</mat-label>
       <input
+        #password="ngModel"
         matInput
         name="password"
-        [(ngModel)]="model.password"
-        #password="ngModel"
-        [type]="hide() ? 'password' : 'text'"
         required
         minlength="6"
+        [type]="hide() ? 'password' : 'text'"
+        [(ngModel)]="model.password"
       />
       <button
         matIconButton
         type="button"
         matSuffix
-        (click)="clickEvent($event)"
         [attr.aria-label]="'Hide password'"
         [attr.aria-pressed]="hide()"
+        (click)="clickEvent($event)"
       >
         <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
       </button>

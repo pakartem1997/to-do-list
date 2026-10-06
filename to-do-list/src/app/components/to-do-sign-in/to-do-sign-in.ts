@@ -11,7 +11,7 @@ import {
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput, MatSuffix } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { Supabase } from '../../services/supabase';
+import { AuthService } from '../../services/auth';
 @Component({
   selector: 'app-to-do-sign-in',
   imports: [
@@ -35,7 +35,7 @@ import { Supabase } from '../../services/supabase';
 })
 export class ToDoSignIn {
   readonly dialogRef = inject(MatDialogRef<ToDoSignIn>);
-  private supabase = inject(Supabase);
+  private authService = inject(AuthService);
 
   model = {
     email: '',
@@ -46,15 +46,15 @@ export class ToDoSignIn {
   hide = signal(true);
 
   clickEvent(event: MouseEvent) {
-    this.hide.set(!this.hide());
     event.stopPropagation();
+    this.hide.set(!this.hide());
   }
 
   async signIn(): Promise<void> {
     const email = this.model.email.trim();
     const password = this.model.password.trim();
 
-    const { data, error } = await this.supabase.signIn(email, password);
+    const { data, error } = await this.authService.signIn(email, password);
 
     if (error) {
       console.error('Ошибка регистрации:', error);

@@ -8,10 +8,11 @@ import { ToDoButton } from '../to-do-button/to-do-button';
 import { TodoStore } from '../../services/todo-store';
 import { take } from 'rxjs';
 import { Task } from '../../interfaces/task.interface';
+import { ToDoCheckbox } from '../to-do-checkbox/to-do-checkbox';
 
 @Component({
-  selector: 'li[appToDoItem]',
-  imports: [TooltipDirective, MatInputModule, FormsModule, ToDoButton],
+  selector: 'li[app-to-do-item]',
+  imports: [TooltipDirective, MatInputModule, FormsModule, ToDoButton, ToDoCheckbox],
   templateUrl: './to-do-item.html',
   styleUrl: './to-do-item.css',
   host: {
@@ -60,6 +61,8 @@ export class ToDoItem {
   }
 
   onStatusChange(checked: boolean): void {
+    this.isCompleted.set(checked);
+
     const newStatus: TodoStatus = checked ? 'Completed' : 'InProgress';
 
     this.statusChange.emit(newStatus);

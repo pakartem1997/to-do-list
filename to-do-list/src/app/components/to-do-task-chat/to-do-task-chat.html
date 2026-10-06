@@ -18,7 +18,25 @@
         Chat
       </ng-template>
       <div class="tab-content">
-        <app-to-do-chat-messages [messages]="messages"></app-to-do-chat-messages>
+        <div class="chat-wrapper">
+          <app-to-do-chat-messages [messages]="messages"></app-to-do-chat-messages>
+          <div class="chat-input-area">
+            <input
+              class="chat-input"
+              placeholder="Сообщение..."
+              [(ngModel)]="userInput"
+              (keyup.enter)="sendMessage()"
+            />
+            <button
+              class="btn-send cursor-pointer"
+              color="primary"
+              [disabled]="!userInput"
+              (click)="sendMessage()"
+            >
+              <mat-icon>send</mat-icon>
+            </button>
+          </div>
+        </div>
       </div>
     </mat-tab>
 
@@ -37,24 +55,4 @@
       <div class="tab-content">{{ currentTask?.description }}</div>
     </mat-tab>
   </mat-tab-group>
-</div>
-
-<div class="chat-footer">
-  <div class="chat-input-area">
-    <input
-      class="chat-input"
-      [(ngModel)]="userInput"
-      placeholder="Сообщение..."
-      (keyup.enter)="sendMessage()"
-    />
-
-    <button
-      class="btn-send cursor-pointer"
-      color="primary"
-      (click)="sendMessage()"
-      [disabled]="!userInput"
-    >
-      <mat-icon>send</mat-icon>
-    </button>
-  </div>
 </div>

@@ -1,4 +1,10 @@
-<input app-checkbox class="cursor-pointer task-checkbox" type="checkbox" />
+<input
+  app-checkbox
+  class="cursor-pointer task-checkbox"
+  type="checkbox"
+  [checked]="isCompleted()"
+  (checkedChange)="onStatusChange(isCompleted())"
+/>
 
 @let currentTask = task();
 
@@ -14,8 +20,8 @@
 
   <div class="task-footer">
     <div class="task-members">
-      @for (member of members; track member.userId) {
-        <app-to-do-user-avatar [imageUrl]="member.avatar" [name]="member.username" />
+      @for (member of members(); track member.userId) {
+        <app-to-do-user-avatar [imageUrl]="member.avatarUrl" [name]="member.username ?? ''" />
       }
     </div>
     <app-to-do-task-message-count></app-to-do-task-message-count>

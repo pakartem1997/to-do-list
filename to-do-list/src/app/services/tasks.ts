@@ -1,35 +1,54 @@
 import { inject, Service } from '@angular/core';
 import { Supabase } from './supabase';
 import { from, Observable } from 'rxjs';
-import { TaskMember } from '../interfaces/roles.interface';
 import { Task } from '../interfaces/task.interface';
 import { TodoStatus } from '../type/todo-status.type';
+import { TaskMemberRow } from '../interfaces/taskMemberRow.interface';
 
 @Service()
-export class TasksServise {
-  private supabase = inject(Supabase).supabase;
+export class TasksService {
+  private supabase = inject(Supabase).client;
 
   getTasks(): Observable<Task[]> {
     return from(
       this.supabase
         .from('tasks')
-        .select('*')
+        .select(
+          `
+        *,
+        task_members (
+          user_id,
+          role
+        )
+      `,
+        )
         .order('created_at', { ascending: false })
         .then(({ data, error }) => {
           if (error) {
             throw error;
           }
 
-          return data as Task[];
+          return (
+            data as (Task & {
+              task_members: TaskMemberRow[];
+            })[]
+          ).map((task) => ({
+            ...task,
+            roles: task.task_members.map((member) => ({
+              userId: member.user_id,
+              role: member.role,
+            })),
+          }));
         }),
     );
   }
 
-  getTask(): Observable<Task> {
+  getTask(id: number): Observable<Task> {
     return from(
       this.supabase
         .from('tasks')
         .select('*')
+        .eq('id', id)
         .single()
         .then(({ data, error }) => {
           if (error) {
@@ -59,14 +78,15 @@ export class TasksServise {
     );
   }
 
-  addTask(text: string, description: string, roles: TaskMember[]): Observable<Task> {
+  addTask(task: Omit<Task, 'id'>): Observable<Task> {
     return from(
       this.supabase
         .from('tasks')
         .insert({
-          text,
-          description,
-          status: 'ToDo',
+          text: task.text,
+          description: task.description,
+          status: task.status,
+          order: task.order,
         })
         .select()
         .single()
@@ -75,7 +95,22 @@ export class TasksServise {
             throw error;
           }
 
-          return data as Task;
+          const { error: membersError } = await this.supabase.from('task_members').insert(
+            task.roles.map((member) => ({
+              task_id: data.id,
+              user_id: member.userId,
+              role: member.role,
+            })),
+          );
+
+          if (membersError) {
+            throw membersError;
+          }
+
+          return {
+            ...data,
+            roles: task.roles,
+          } as Task;
         }),
     );
   }

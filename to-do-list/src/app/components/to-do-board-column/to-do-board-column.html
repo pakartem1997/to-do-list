@@ -7,11 +7,11 @@
   cdkDropList
   [cdkDropListData]="taskList"
   [id]="status()"
-  (cdkDropListDropped)="taskDrop.emit($event)"
   [class.empty]="taskList.length === 0"
+  (cdkDropListDropped)="taskDrop.emit($event)"
 >
   @for (task of taskList; track task.id) {
-    <li class="task-item" cdkDrag [cdkDragData]="task" tabindex="0" [id]="task.id">
+    <li class="task-item" cdkDrag tabindex="0" [cdkDragData]="task" [id]="task.id">
       {{ task.text }}
     </li>
   }

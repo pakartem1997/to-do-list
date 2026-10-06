@@ -1,6 +1,6 @@
 @let taskData = task();
-@let isCompleted = taskData.status === 'Completed';
-@let statusActionText = isCompleted ? returnToProgress : completeTask;
+@let completed = isCompleted();
+@let statusActionText = completed ? returnToProgress : completeTask;
 
 <div class="task-status">
   <input
@@ -9,8 +9,8 @@
     app-checkbox
     type="checkbox"
     [appTooltip]="statusActionText"
-    [checked]="isCompleted"
-    (change)="onStatusChange(statusCheckbox.checked)"
+    [checked]="completed"
+    (checkedChange)="onStatusChange(!completed)"
   />
 
   {{ statusActionText }}

@@ -29,7 +29,7 @@ module.exports = defineConfig([
         {
           type: ['element', 'attribute'],
           prefix: 'app',
-          style: '',
+          style: 'kebab-case',
         },
       ],
     },

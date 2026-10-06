@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ToDoSignIn } from '../to-do-sign-in/to-do-sign-in';
 import { AuthService } from '../../services/auth';
 import { ToDoUserAvatar } from '../to-do-user-avatar/to-do-user-avatar';
+import { UserService } from '../../services/user';
 
 @Component({
   selector: 'app-to-do-auth-actions',
@@ -13,8 +14,11 @@ import { ToDoUserAvatar } from '../to-do-user-avatar/to-do-user-avatar';
   styleUrl: './to-do-auth-actions.css',
 })
 export class ToDoAuthActions {
-  private dialog = inject(MatDialog);
-  protected authService = inject(AuthService);
+  private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
+
+  readonly displayName = this.userService.displayName;
 
   openLogin(): void {
     this.dialog.open(ToDoSignIn, {

@@ -11,7 +11,6 @@ import { Task } from '../../interfaces/task.interface';
 import { forkJoin, take } from 'rxjs';
 import { TodoStore } from '../../services/todo-store';
 import { ToastService } from '../../services/toast';
-import { Supabase } from '../../services/supabase';
 
 @Component({
   selector: 'app-board',
@@ -20,16 +19,15 @@ import { Supabase } from '../../services/supabase';
   styleUrl: './board.css',
 })
 export class Board implements OnInit {
-  // private readonly todoStore = inject(TodoStore);
   private readonly toastService = inject(ToastService);
-  private readonly supabase = inject(Supabase);
+  private readonly todoStore = inject(TodoStore);
 
   statuses: TodoStatus[] = ['ToDo', 'InProgress', 'Completed'];
 
-  tasks = this.supabase.tasks;
+  tasks = this.todoStore.tasks;
 
   ngOnInit() {
-    this.supabase.getTasks().pipe(take(1)).subscribe();
+    this.todoStore.getTasks().pipe(take(1)).subscribe();
   }
 
   columns = computed(() =>
@@ -50,7 +48,7 @@ export class Board implements OnInit {
         order: index,
       }));
 
-      this.supabase
+      this.todoStore
         .changeTaskOrder(currentTasks)
         .pipe(take(1))
         .subscribe({
@@ -89,9 +87,9 @@ export class Board implements OnInit {
     const newStatus = event.container.id as TodoStatus;
 
     forkJoin([
-      this.supabase.changeTaskOrder([...previousTasks, ...currentTasks]),
+      this.todoStore.changeTaskOrder([...previousTasks, ...currentTasks]),
 
-      this.supabase.changeTaskStatus(task.id, newStatus),
+      this.todoStore.changeTaskStatus(task.id, newStatus),
     ])
       .pipe(take(1))
       .subscribe({

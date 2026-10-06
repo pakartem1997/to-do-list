@@ -1,5 +1,5 @@
 <div class="auth-actions">
-  @if (authService.displayName(); as displayName) {
+  @if (displayName(); as displayName) {
     <app-to-do-user-avatar [name]="displayName" />
     <span>{{ displayName }}</span>
     <button matButton (click)="logout()">Выйти</button>
