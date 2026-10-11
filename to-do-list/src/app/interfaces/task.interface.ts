@@ -6,6 +6,7 @@ export interface Task {
   text: string;
   description: string;
   status: TodoStatus | null;
-  roles: TaskMember[];
+  task_members: TaskMember[];
   order: number;
+  created_at: string;
 }

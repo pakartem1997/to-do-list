@@ -1,58 +1,91 @@
-@let currentTask = task();
-
-<div class="chat-header">
-  <button type="button" class="btn-close cursor-pointer" (click)="closeChat()">
-    <mat-icon>close</mat-icon>
-  </button>
-  <div class="chat-header-info">
-    <span class="chat-header-text"> {{ currentTask?.text }} </span>
-    <app-to-do-task-status-badge [status]="currentTask?.status ?? ''"></app-to-do-task-status-badge>
+@if (isLoading()) {
+  <app-to-do-spinner></app-to-do-spinner>
+} @else if (task(); as currentTask) {
+  <div class="chat-header">
+    <button type="button" class="btn-close cursor-pointer" (click)="closeChat()">
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="chat-header-info">
+      <span class="chat-header-text"> {{ currentTask.text }} </span>
+      <app-to-do-task-status-badge [status]="currentTask.status"></app-to-do-task-status-badge>
+    </div>
   </div>
-</div>
 
-<div class="chat-body">
-  <mat-tab-group>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="example-tab-icon">chat</mat-icon>
-        Chat
-      </ng-template>
-      <div class="tab-content">
-        <div class="chat-wrapper">
-          <app-to-do-chat-messages [messages]="messages"></app-to-do-chat-messages>
-          <div class="chat-input-area">
-            <input
-              class="chat-input"
-              placeholder="Сообщение..."
-              [(ngModel)]="userInput"
-              (keyup.enter)="sendMessage()"
-            />
-            <button
-              class="btn-send cursor-pointer"
-              color="primary"
-              [disabled]="!userInput"
-              (click)="sendMessage()"
-            >
-              <mat-icon>send</mat-icon>
-            </button>
+  <div class="chat-body">
+    <mat-tab-group>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="example-tab-icon">chat</mat-icon>
+          Chat
+        </ng-template>
+        <div class="tab-content">
+          <div class="chat-wrapper">
+            <app-to-do-chat-messages
+              [messages]="messages()"
+              [currentUserId]="userId()"
+              (delete)="deleteMessage($event)"
+            ></app-to-do-chat-messages>
+            <div class="wrapper-typing">
+              @for (typingUser of typingUsers().values(); track typingUser.userId) {
+                @if (typingUser.isTyping) {
+                  <app-to-do-user-is-typing [userName]="typingUser.userName" />
+                }
+              }
+            </div>
+            <div class="chat-input-area">
+              <input
+                class="chat-input"
+                placeholder="Сообщение..."
+                [(ngModel)]="messageInput"
+                (keyup.enter)="sendMessage(currentTask.id)"
+                (keydown)="sendTypingIndicator()"
+              />
+              <button
+                class="btn-send cursor-pointer"
+                color="primary"
+                [disabled]="!messageInput().trim()"
+                (click)="sendMessage(currentTask.id)"
+              >
+                <mat-icon>send</mat-icon>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </mat-tab>
+      </mat-tab>
 
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="example-tab-icon">info</mat-icon>
-        Info / Log
-      </ng-template>
-      <div class="tab-content">Content 2</div>
-    </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="example-tab-icon">info</mat-icon>
+          Info / Log
+        </ng-template>
+        <div class="tab-content">
+          <app-to-do-task-info
+            [title]="currentTask.text"
+            [task]="currentTask"
+            [members]="members()"
+            [users]="users()"
+            (changeTitle)="changeTitle(currentTask.id, $event)"
+            (changeStatus)="changeStatus(currentTask.id, $event)"
+            (addMember)="addMembers(currentTask.id, $event)"
+            (removeMember)="removeMember(currentTask.id, $event)"
+          ></app-to-do-task-info>
+        </div>
+      </mat-tab>
 
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="example-tab-icon">description</mat-icon>
-      </ng-template>
-      <div class="tab-content">{{ currentTask?.description }}</div>
-    </mat-tab>
-  </mat-tab-group>
-</div>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="example-tab-icon">description</mat-icon>
+          Description
+        </ng-template>
+        <div class="tab-content">
+          <app-to-do-desription
+            [textDesription]="currentTask.description"
+            (descriptionChange)="descriptionChange(currentTask.id, $event)"
+          ></app-to-do-desription>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+} @else {
+  <app-to-do-task-not-found (closeChat)="closeChat()"></app-to-do-task-not-found>
+}

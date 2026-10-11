@@ -1,16 +1,15 @@
 :host {
   display: flex;
   gap: 20px;
+  height: 100%;
 }
 
 .list {
   display: flex;
   flex-direction: column;
   gap: 10px;
-
   flex: 1 1 100%;
   min-width: 0;
-
   transition: flex-basis 300ms ease;
 }
 

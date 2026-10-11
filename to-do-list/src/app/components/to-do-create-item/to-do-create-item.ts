@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, effect, inject, OnInit, signal, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { TextFieldModule } from '@angular/cdk/text-field';
@@ -27,7 +27,7 @@ import { UserService } from '../../services/user';
   templateUrl: './to-do-create-item.html',
   styleUrl: './to-do-create-item.css',
 })
-export class ToDoCreateItem {
+export class ToDoCreateItem implements OnInit {
   private readonly todoStore = inject(TodoStore);
   private readonly toastService = inject(ToastService);
   private readonly profileService = inject(ProfileService);
@@ -36,15 +36,17 @@ export class ToDoCreateItem {
   users = signal<Profile[]>([]);
 
   constructor() {
-    this.loadUsers();
-
     effect(() => {
       const user = this.userService.user();
 
       if (user) {
-        this.model.roles[0].userId = user.id;
+        this.model.task_members[0].user_id = user.id;
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.loadUsers();
   }
 
   private loadUsers(): void {
@@ -65,22 +67,22 @@ export class ToDoCreateItem {
   model: {
     title: string;
     description: string;
-    roles: Pick<TaskMember, 'userId' | 'role'>[];
+    task_members: Pick<TaskMember, 'user_id' | 'role'>[];
   } = {
     title: '',
     description: '',
-    roles: [
+    task_members: [
       {
         role: 'Creator',
-        userId: null,
+        user_id: null,
       },
       {
         role: 'Responsible',
-        userId: null,
+        user_id: null,
       },
       {
         role: 'Executor',
-        userId: null,
+        user_id: null,
       },
     ],
   };
@@ -88,23 +90,23 @@ export class ToDoCreateItem {
   todoForm = viewChild<NgForm>('todoForm');
 
   addRole(): void {
-    this.model.roles.push({
+    this.model.task_members.push({
       role: null,
-      userId: null,
+      user_id: null,
     });
   }
 
   removeRole(index: number): void {
-    this.model.roles.splice(index, 1);
+    this.model.task_members.splice(index, 1);
   }
 
   addTask(): void {
     const title = this.model.title.trim();
     const description = this.model.description.trim();
-    const roles = this.model.roles;
+    const task_members = this.model.task_members;
 
     this.todoStore
-      .addTask(title, description, roles)
+      .addTask(title, description, task_members)
       .pipe(take(1))
       .subscribe({
         next: () => {

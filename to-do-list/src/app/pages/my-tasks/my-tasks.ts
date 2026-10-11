@@ -27,7 +27,7 @@ export class MyTasks implements OnInit {
 
     return this.todoStore
       .tasks()
-      .filter((task) => task.roles.some((role) => role.userId === userId));
+      .filter((task) => task.task_members.some((member) => member.user_id === userId));
   });
 
   ngOnInit() {

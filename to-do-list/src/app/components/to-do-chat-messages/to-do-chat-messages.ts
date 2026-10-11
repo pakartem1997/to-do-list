@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { ChatMessage } from '../../interfaces/message.interface';
 import { ToDoChatMessage } from '../to-do-chat-message/to-do-chat-message';
 
@@ -10,5 +10,12 @@ import { ToDoChatMessage } from '../to-do-chat-message/to-do-chat-message';
 })
 export class ToDoChatMessages {
   messages = input<ChatMessage[]>([]);
-  currentUserId = 1;
+  currentUserId = input<string | null>(null);
+
+  delete = output<number>();
+
+  clickDelete(idMessage: number) {
+    console.log(idMessage);
+    this.delete.emit(idMessage);
+  }
 }

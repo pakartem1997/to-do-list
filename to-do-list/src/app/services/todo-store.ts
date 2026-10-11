@@ -2,42 +2,45 @@ import { inject, Service, signal } from '@angular/core';
 import { Task } from '../interfaces/task.interface';
 import { finalize, Observable, tap } from 'rxjs';
 import { TodoStatus } from '../type/todo-status.type';
-import { TaskMember } from '../interfaces/roles.interface';
 import { TasksService } from './tasks';
+import { TaskMember } from '../interfaces/roles.interface';
+import { CreateTask } from '../interfaces/create-task.interface';
 
 @Service()
 export class TodoStore {
   private readonly tasksService = inject(TasksService);
 
   private readonly tasksSignal = signal<Task[]>([]);
-  readonly isLoading = signal(false);
-
   readonly tasks = this.tasksSignal.asReadonly();
 
+  private readonly isSignalLoading = signal(false);
+  readonly isLoading = this.isSignalLoading.asReadonly();
+
   getTasks(): Observable<Task[]> {
-    this.isLoading.set(true);
+    this.isSignalLoading.set(true);
 
     return this.tasksService.getTasks().pipe(
       tap((tasks) => {
+        // console.log(tasks);
         this.tasksSignal.set(tasks);
       }),
-      finalize(() => this.isLoading.set(false)),
+      finalize(() => this.isSignalLoading.set(false)),
     );
   }
 
-  getTask(id: number): Observable<Task> {
-    return this.tasksService.getTask(id);
-  }
-
-  addTask(text: string, description: string, roles: TaskMember[]): Observable<Task> {
+  addTask(
+    text: string,
+    description: string,
+    task_members: Pick<TaskMember, 'user_id' | 'role'>[],
+  ): Observable<Task> {
     const tasks = this.tasksSignal();
 
     const maxOrder = tasks.length ? Math.max(...tasks.map((task) => task.order)) : -1;
 
-    const newTask: Omit<Task, 'id'> = {
+    const newTask: CreateTask = {
       text,
       description,
-      roles,
+      task_members,
       status: 'ToDo',
       order: maxOrder + 1,
     };
@@ -51,9 +54,19 @@ export class TodoStore {
 
   editTask(id: number, text: string): Observable<Task> {
     return this.tasksService.editTask(id, text).pipe(
-      tap((updatedTask) => {
+      tap(() => {
         this.tasksSignal.update((tasks) =>
-          tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
+          tasks.map((task) => (task.id === id ? { ...task, text } : task)),
+        );
+      }),
+    );
+  }
+
+  editDescription(id: number, description: string): Observable<Task> {
+    return this.tasksService.editDescription(id, description).pipe(
+      tap(() => {
+        this.tasksSignal.update((tasks) =>
+          tasks.map((task) => (task.id === id ? { ...task, description } : task)),
         );
       }),
     );
@@ -69,9 +82,9 @@ export class TodoStore {
 
   changeTaskStatus(id: number, status: TodoStatus): Observable<Task> {
     return this.tasksService.changeTaskStatus(id, status).pipe(
-      tap((updatedTask) => {
+      tap(() => {
         this.tasksSignal.update((tasks) =>
-          tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
+          tasks.map((task) => (task.id === id ? { ...task, status } : task)),
         );
       }),
     );

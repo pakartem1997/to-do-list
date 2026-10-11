@@ -1,0 +1,37 @@
+@let editing = isEdit();
+
+<div class="desription-header">
+  <h2 class="desription-title"><mat-icon>description</mat-icon> Description task</h2>
+
+  <div class="container-btn">
+    @if (editing) {
+      <button matMiniFab class="btn" type="button" (click)="saveEdit()">
+        <mat-icon>save</mat-icon>
+      </button>
+
+      <button matMiniFab class="btn" type="button" (click)="cancelEdit()">
+        <mat-icon>close</mat-icon>
+      </button>
+    } @else {
+      <button matMiniFab class="btn" type="button" (click)="startEdit()">
+        <mat-icon>edit</mat-icon>
+      </button>
+
+      <button matMiniFab class="btn" type="button" (click)="openDialog()">
+        <mat-icon>fullscreen</mat-icon>
+      </button>
+    }
+  </div>
+</div>
+
+@if (editing) {
+  <mat-form-field>
+    <mat-label>Description</mat-label>
+
+    <textarea matInput [(ngModel)]="editedDescription"></textarea>
+  </mat-form-field>
+} @else {
+  <div class="description-content">
+    {{ textDesription() }}
+  </div>
+}

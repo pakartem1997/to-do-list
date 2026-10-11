@@ -1,0 +1,9 @@
+:host {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #485164;
+  border-radius: 10px;
+  background-color: #343b4b;
+  color: #f1f3f7;
+}

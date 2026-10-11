@@ -1,8 +1,16 @@
-<app-to-do-user-avatar [name]="message().author.name"></app-to-do-user-avatar>
+@let currentMessage = message();
+@let currentProfile = currentMessage.profile;
+
+<app-to-do-user-avatar [name]="currentMessage.profile.username ?? 'User'" />
 <div class="message-content">
-  <div class="author">{{ message().author.name }}</div>
+  <div class="message-header">
+    <div class="author">{{ currentProfile.username }}</div>
+    <button matIconButton class="btn" type="button" (click)="clickDelete(currentMessage.id)">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
   <div class="message-body">
-    <div class="text">{{ message().text }}</div>
-    <div class="time">{{ message().createdAt }}</div>
+    <div class="text">{{ currentMessage.text }}</div>
+    <div class="time">{{ currentMessage.created_at | date: 'dd.MM.yyyy HH:mm' }}</div>
   </div>
 </div>

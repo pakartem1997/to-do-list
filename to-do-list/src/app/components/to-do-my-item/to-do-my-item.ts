@@ -5,9 +5,9 @@ import { ToDoTaskMessageCount } from '../to-do-task-message-count/to-do-task-mes
 import { MatIcon } from '@angular/material/icon';
 import { ToDoUserAvatar } from '../to-do-user-avatar/to-do-user-avatar';
 import { MemberService } from '../../services/member';
-import { TaskMember } from '../../interfaces/roles.interface';
 import { TodoStatus } from '../../type/todo-status.type';
 import { ToDoCheckbox } from '../to-do-checkbox/to-do-checkbox';
+import { TaskMemberWithProfile } from '../../type/taskMemberWithProfile.type';
 
 @Component({
   selector: 'li[app-my-item]',
@@ -20,7 +20,7 @@ export class ToDoMyItem implements OnInit {
 
   task = input.required<Task>();
 
-  members = signal<TaskMember[]>([]);
+  members = signal<TaskMemberWithProfile[]>([]);
 
   statusChange = output<TodoStatus>();
 
@@ -29,7 +29,6 @@ export class ToDoMyItem implements OnInit {
   ngOnInit() {
     this.memberService.getTaskMembers(this.task().id).subscribe({
       next: (members) => {
-        console.log('Роли:', members);
         this.members.set(members);
       },
       error: (error) => {

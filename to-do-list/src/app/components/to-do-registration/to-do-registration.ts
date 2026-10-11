@@ -11,7 +11,6 @@ import {
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput, MatSuffix } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { Supabase } from '../../services/supabase';
 import { AuthService } from '../../services/auth';
 
 @Component({

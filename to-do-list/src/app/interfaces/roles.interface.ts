@@ -1,8 +1,9 @@
-import { Roles } from '../type/roles.type';
+import { Roles } from '../constants/roles.constants';
 
 export interface TaskMember {
-  userId: string | null;
+  created_at: string;
+  id: number;
   role: Roles | null;
-  username?: string;
-  avatarUrl?: string;
+  task_id: number;
+  user_id: string | null;
 }

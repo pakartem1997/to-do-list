@@ -3,7 +3,7 @@ import { Supabase } from './supabase';
 import { from, Observable } from 'rxjs';
 import { Task } from '../interfaces/task.interface';
 import { TodoStatus } from '../type/todo-status.type';
-import { TaskMemberRow } from '../interfaces/taskMemberRow.interface';
+import { CreateTask } from '../interfaces/create-task.interface';
 
 @Service()
 export class TasksService {
@@ -16,10 +16,7 @@ export class TasksService {
         .select(
           `
         *,
-        task_members (
-          user_id,
-          role
-        )
+        task_members (*)
       `,
         )
         .order('created_at', { ascending: false })
@@ -27,18 +24,7 @@ export class TasksService {
           if (error) {
             throw error;
           }
-
-          return (
-            data as (Task & {
-              task_members: TaskMemberRow[];
-            })[]
-          ).map((task) => ({
-            ...task,
-            roles: task.task_members.map((member) => ({
-              userId: member.user_id,
-              role: member.role,
-            })),
-          }));
+          return data as unknown as Task[];
         }),
     );
   }
@@ -78,7 +64,25 @@ export class TasksService {
     );
   }
 
-  addTask(task: Omit<Task, 'id'>): Observable<Task> {
+  editDescription(id: number, description: string): Observable<Task> {
+    return from(
+      this.supabase
+        .from('tasks')
+        .update({ description })
+        .eq('id', id)
+        .select()
+        .single()
+        .then(({ data, error }) => {
+          if (error) {
+            throw error;
+          }
+
+          return data as Task;
+        }),
+    );
+  }
+
+  addTask(task: CreateTask): Observable<Task> {
     return from(
       this.supabase
         .from('tasks')
@@ -96,9 +100,9 @@ export class TasksService {
           }
 
           const { error: membersError } = await this.supabase.from('task_members').insert(
-            task.roles.map((member) => ({
+            task.task_members.map((member) => ({
               task_id: data.id,
-              user_id: member.userId,
+              user_id: member.user_id,
               role: member.role,
             })),
           );
@@ -109,12 +113,14 @@ export class TasksService {
 
           return {
             ...data,
-            roles: task.roles,
+            roles: task.task_members.map((member) => ({
+              user_id: member.user_id,
+              role: member.role,
+            })),
           } as Task;
         }),
     );
   }
-
   changeTaskOrder(tasks: Pick<Task, 'id' | 'order'>[]): Observable<Task[]> {
     return from(
       Promise.all(

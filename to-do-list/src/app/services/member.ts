@@ -1,20 +1,21 @@
 import { inject, Service } from '@angular/core';
-import { from, map, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { Supabase } from './supabase';
 import { TaskMember } from '../interfaces/roles.interface';
+import { Roles } from '../constants/roles.constants';
+import { TaskMemberWithProfile } from '../type/taskMemberWithProfile.type';
 
 @Service()
 export class MemberService {
   private supabase = inject(Supabase).client;
 
-  getTaskMembers(taskId: number): Observable<TaskMember[]> {
+  getTaskMembers(taskId: number): Observable<TaskMemberWithProfile[]> {
     return from(
       this.supabase
         .from('task_members')
         .select(
           `
-        user_id,
-        role,
+        *,
         profiles (
           username,
           avatar_url
@@ -27,35 +28,33 @@ export class MemberService {
             throw error;
           }
 
-          console.log('DATA:', data);
-          console.log('FIRST MEMBER:', data[0]);
-          console.log('PROFILE:', data[0]?.profiles);
-
-          return data.map((member) => ({
-            userId: member.user_id,
-            role: member.role,
-            // @ts-ignore
-            username: member.profiles?.username ?? '',
-            // @ts-ignore
-            avatarUrl: member.profiles?.avatar_url ?? '',
-          }));
+          return data;
         }),
     );
   }
 
-  addMember(taskId: number, userId: string, role: string) {
+  addMember(taskId: number, userId: string, role: Roles): Observable<TaskMember> {
     return from(
-      this.supabase.from('task_members').insert({
-        task_id: taskId,
-        user_id: userId,
-        role,
-      }),
+      this.supabase
+        .from('task_members')
+        .insert({
+          task_id: taskId,
+          user_id: userId,
+          role,
+        })
+        .select()
+        .single()
+        .then(async ({ data, error }) => {
+          if (error) {
+            throw error;
+          }
+
+          return data;
+        }),
     );
   }
 
-  removeMember(taskId: number, userId: string) {
-    return from(
-      this.supabase.from('task_members').delete().eq('task_id', taskId).eq('user_id', userId),
-    );
+  removeMember(id: number) {
+    return from(this.supabase.from('task_members').delete().eq('id', id));
   }
 }

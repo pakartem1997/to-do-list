@@ -1,0 +1,114 @@
+<h2 class="info-header">
+  <mat-icon>info</mat-icon>
+  Information about the task
+</h2>
+
+<div class="info-body">
+  <div class="task-title-row">
+    @if (isEdit()) {
+      <mat-form-field>
+        <input class="task-input" matInput placeholder="Edit task..." [(ngModel)]="editedTitle" />
+      </mat-form-field>
+
+      <button matMiniFab class="icon-btn btn-save" type="button" (click)="saveEdit()">
+        <mat-icon>save</mat-icon>
+      </button>
+    } @else {
+      <h3 class="task-title">
+        {{ title() }}
+      </h3>
+
+      <button matMiniFab class="icon-btn" type="button" (click)="startEdit()">
+        <mat-icon>edit</mat-icon>
+      </button>
+    }
+  </div>
+
+  <div class="task-meta">
+    <div class="task-meta-item">
+      <div class="task-meta-title">
+        <mat-icon>flag_2</mat-icon>
+        <span class="task-meta-label">Status</span>
+      </div>
+
+      <mat-form-field class="status-select" appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [ngModel]="selectedStatus()" (ngModelChange)="onStatusChange($event)">
+          @for (status of statuses; track status) {
+            <mat-option [value]="status.value">
+              {{ status.viewValue }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="task-meta-item">
+      <div class="task-meta-title">
+        <mat-icon>calendar_month</mat-icon>
+        <span class="task-meta-label">Created</span>
+      </div>
+
+      <span class="created-date">
+        {{ task().created_at | date: 'dd.MM.yyyy HH:mm' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="members">
+    <div class="members-header">
+      <div class="members-title-wrapper">
+        <span class="members-title">Members</span>
+        <span class="members-count">{{ members().length }}</span>
+      </div>
+
+      <div class="members-actions">
+        <mat-form-field appearance="outline" class="user-select">
+          <mat-label>User</mat-label>
+
+          <mat-select required [(value)]="selectedUserId">
+            @for (user of users(); track user.id) {
+              <mat-option [value]="user.id">
+                {{ user.username }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button matMiniFab [matMenuTriggerFor]="menu" class="icon-btn" type="button">
+          <mat-icon>person_add</mat-icon>
+        </button>
+      </div>
+
+      <mat-menu #menu="matMenu">
+        @for (role of roles; track role.value) {
+          <button mat-menu-item [disabled]="!selectedUserId()" (click)="onAddMember(role.value)">
+            {{ role.label }}
+          </button>
+        }
+      </mat-menu>
+    </div>
+
+    <div class="member-row-wrapper">
+      @for (member of members(); track member.id) {
+        <div class="member-row">
+          <div class="member-info">
+            <app-to-do-user-avatar
+              [imageUrl]="member.profiles?.avatar_url ?? ''"
+              [name]="member.profiles?.username ?? ''"
+            />
+
+            <div class="member-meta">
+              <span class="member-name">{{ member.profiles?.username }}</span>
+              <span class="member-role">{{ member.role }}</span>
+            </div>
+          </div>
+
+          <button matMiniFab class="icon-btn" type="button" (click)="onRemoveMember(member.id)">
+            <mat-icon>person_remove</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

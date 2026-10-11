@@ -20,8 +20,11 @@
 
   <div class="task-footer">
     <div class="task-members">
-      @for (member of members(); track member.userId) {
-        <app-to-do-user-avatar [imageUrl]="member.avatarUrl" [name]="member.username ?? ''" />
+      @for (member of members(); track member.id) {
+        <app-to-do-user-avatar
+          [imageUrl]="member.profiles?.avatar_url ?? ''"
+          [name]="member.profiles?.username ?? ''"
+        />
       }
     </div>
     <app-to-do-task-message-count></app-to-do-task-message-count>

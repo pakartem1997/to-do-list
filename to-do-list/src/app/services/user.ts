@@ -11,18 +11,20 @@ export class UserService {
 
   displayName = computed(() => this.user()?.user_metadata?.['display_name'] ?? this.user()?.email);
 
-  readonly isAuthenticated = () => this.user() !== null;
+  readonly isAuthenticated = computed(() => this.user() !== null);
 
   constructor() {
     this.init();
   }
 
   private async init() {
-    const {
-      data: { user },
-    } = await this.supabase.auth.getUser();
+    const { data, error } = await this.supabase.auth.getUser();
 
-    this.user.set(user);
+    if (error) {
+      throw new Error('Произошла ошибка');
+    }
+
+    this.user.set(data.user);
 
     this.supabase.auth.onAuthStateChange((_event, session) => {
       this.user.set(session?.user ?? null);

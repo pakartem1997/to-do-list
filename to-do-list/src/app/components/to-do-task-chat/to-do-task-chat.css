@@ -1,9 +1,14 @@
 :host {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   background-color: var(--bg-main);
   border-radius: 10px;
-  height: 600px;
+  height: 100%;
+}
+
+:host:has(app-to-do-spinner) {
+  align-items: center;
 }
 
 .chat-header {
@@ -71,8 +76,6 @@
 
 app-to-do-chat-messages {
   flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .tab-content {
@@ -88,4 +91,23 @@ app-to-do-chat-messages {
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+.wrapper-typing {
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #29223d;
+  border: 1px solid #513b78;
+  color: #c8a8ff;
+}
+
+.wrapper-typing:empty {
+  display: none;
+}
+
+.chat-input-area {
+  margin-top: 10px;
 }
