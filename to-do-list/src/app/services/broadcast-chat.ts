@@ -1,7 +1,9 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Service, signal } from '@angular/core';
 import { Supabase } from './supabase';
-import { UserService } from './user';
 import { ChatMessage } from '../interfaces/message.interface';
+import { UserStore } from './user-store';
+import { BroadcastChatApi } from './broadcast-chat-api';
+import { Observable, take, tap, throwError } from 'rxjs';
 
 interface TypingUser {
   userName: string;
@@ -9,12 +11,11 @@ interface TypingUser {
   isTyping: boolean;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class BroadcastChat {
   private readonly supabase = inject(Supabase).client;
-  private readonly userService = inject(UserService);
+  private readonly userStore = inject(UserStore);
+  private readonly broadcastChatApi = inject(BroadcastChatApi);
 
   readonly messagesSignal = signal<ChatMessage[]>([]);
   readonly messages = this.messagesSignal.asReadonly();
@@ -38,15 +39,12 @@ export class BroadcastChat {
         },
       })
       .on('broadcast', { event: 'INSERT' }, ({ payload }) => {
-        console.log('INSERT:', payload);
         this.messagesSignal.update((messages) => [...messages, payload]);
-        this.messageReceived(payload);
       })
       .on('broadcast', { event: 'UPDATE' }, ({ payload }) => {
         console.log('UPDATE:', payload);
       })
       .on('broadcast', { event: 'DELETE' }, ({ payload }) => {
-        console.log('DELETE:', payload);
         this.messagesSignal.update((messages) =>
           messages.filter((message) => message.id !== payload.id),
         );
@@ -62,84 +60,44 @@ export class BroadcastChat {
 
           return newUsers;
         });
-
-        console.log(payload);
-        console.log(this.typingUsersSignal());
       })
       .subscribe((status) => {
         console.log('CHANNEL STATUS:', status);
       });
   }
 
-  async sendMessage(taskId: number, text: string): Promise<void> {
-    const userId = this.userService.userId();
+  sendMessage(taskId: number, text: string): Observable<ChatMessage> {
+    const userId = this.userStore.userId();
 
-    if (!userId || !text.trim()) {
-      return;
+    if (!userId) {
+      return throwError(() => new Error('The user is not authorized!'));
     }
 
-    const { data, error } = await this.supabase
-      .from('task_messages')
-      .insert({
-        task_id: taskId,
-        user_id: userId,
-        text: text.trim(),
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Send message error:', error);
-      return;
-    }
-
-    console.log('Message saved:', data);
+    return this.broadcastChatApi.sendMessage(taskId, text, userId);
   }
 
-  async deleteMessage(messageId: number) {
-    console.log(messageId);
-    const { error } = await this.supabase.from('task_messages').delete().eq('id', messageId);
-
-    if (error) {
-      console.error('Delete message error:', error);
-    }
-
-    this.messagesSignal.update((messages) =>
-      messages.filter((message) => message.id !== messageId),
+  deleteMessage(messageId: number): Observable<void> {
+    return this.broadcastChatApi.deleteMessage(messageId).pipe(
+      tap(() => {
+        this.messagesSignal.update((messages) =>
+          messages.filter((message) => message.id !== messageId),
+        );
+      }),
     );
   }
 
-  private messageReceived(payload: ChatMessage): void {
-    console.log('Received:', payload);
-  }
-
-  private async loadMessages(taskId: number): Promise<void> {
-    const { data, error } = await this.supabase
-      .from('task_messages')
-      .select(
-        `
-      id,
-      task_id,
-      user_id,
-      text,
-      created_at,
-      profile:profiles (
-        id,
-        username,
-        avatar_url
-      )
-    `,
-      )
-      .eq('task_id', taskId)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error('Load messages error:', error);
-      return;
-    }
-
-    const messages = data as unknown as ChatMessage[];
-    this.messagesSignal.set(messages);
+  private loadMessages(taskId: number): void {
+    this.broadcastChatApi
+      .loadMessages(taskId)
+      .pipe(take(1))
+      .subscribe({
+        next: (messages) => {
+          this.messagesSignal.set(messages);
+        },
+        error: (error) => {
+          console.error('Load messages error:', error);
+        },
+      });
   }
 
   private typingTimeout?: ReturnType<typeof setTimeout>;
@@ -156,8 +114,8 @@ export class BroadcastChat {
         type: 'broadcast',
         event: 'typing',
         payload: {
-          userName: this.userService.displayName(),
-          userId: this.userService.userId(),
+          userName: this.userStore.displayName(),
+          userId: this.userStore.userId(),
           isTyping: true,
         },
       });
@@ -173,13 +131,10 @@ export class BroadcastChat {
       type: 'broadcast',
       event: 'typing',
       payload: {
-        userName: this.userService.displayName(),
-        userId: this.userService.userId(),
+        userName: this.userStore.displayName(),
+        userId: this.userStore.userId(),
         isTyping: false,
       },
     });
   }
-  // unsubscribe(): void {
-  //   this.supabase.removeChannel(this.channel);
-  // }
 }

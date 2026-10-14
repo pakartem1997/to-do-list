@@ -14,7 +14,14 @@ import { ToDoModalDesription } from '../to-do-modal-desription/to-do-modal-desri
   styleUrl: './to-do-desription.css',
 })
 export class ToDoDesription {
-  dialog = inject(MatDialog);
+  private readonly dialog = inject(MatDialog);
+
+  textDesription = input<string>('');
+
+  isEdit = signal(false);
+  editedDescription = '';
+
+  descriptionChange = output<string>();
 
   openDialog() {
     this.dialog.open(ToDoModalDesription, {
@@ -23,14 +30,6 @@ export class ToDoDesription {
       },
     });
   }
-
-  textDesription = input<string>('');
-
-  isEdit = signal(false);
-
-  editedDescription = '';
-
-  descriptionChange = output<string>();
 
   startEdit() {
     this.editedDescription = this.textDesription();

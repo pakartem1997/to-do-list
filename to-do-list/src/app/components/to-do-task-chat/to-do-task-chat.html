@@ -62,6 +62,7 @@
           <app-to-do-task-info
             [title]="currentTask.text"
             [task]="currentTask"
+            [history]="history()"
             [members]="members()"
             [users]="users()"
             (changeTitle)="changeTitle(currentTask.id, $event)"

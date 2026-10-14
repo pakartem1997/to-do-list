@@ -11,6 +11,7 @@ import { Task } from '../../interfaces/task.interface';
 import { forkJoin, take } from 'rxjs';
 import { TodoStore } from '../../services/todo-store';
 import { ToastService } from '../../services/toast';
+import { TaskHistoryStore } from '../../services/task-history-store';
 
 @Component({
   selector: 'app-board',
@@ -21,12 +22,13 @@ import { ToastService } from '../../services/toast';
 export class Board implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly todoStore = inject(TodoStore);
+  private readonly taskHistoryStore = inject(TaskHistoryStore);
 
   statuses: TodoStatus[] = ['ToDo', 'InProgress', 'Completed'];
 
   tasks = this.todoStore.tasks;
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.todoStore.getTasks().pipe(take(1)).subscribe();
   }
 
@@ -34,12 +36,12 @@ export class Board implements OnInit {
     this.statuses.map((status) => ({
       status,
       tasks: this.tasks()
-        .filter((t) => t.status === status)
+        .filter((task) => task.status === status)
         .sort((a, b) => a.order - b.order),
     })),
   );
 
-  drop(event: CdkDragDrop<Task[]>) {
+  drop(event: CdkDragDrop<Task[]>): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
 
@@ -55,11 +57,11 @@ export class Board implements OnInit {
           next: () => {
             this.toastService.showToast($localize`:@@taskOrderUpdated:Task order updated!`);
           },
-          error: () => {
+          error: (error) => {
+            console.error(error);
             this.toastService.showToast(
               $localize`:@@taskOrderUpdateError:Failed to update task order!`,
             );
-            // this.supabase.reloadTasks().pipe(take(1)).subscribe();
           },
         });
 
@@ -83,24 +85,44 @@ export class Board implements OnInit {
       order: index,
     }));
 
-    const task = event.item.data;
+    const task = event.item.data as Task;
     const newStatus = event.container.id as TodoStatus;
+
+    const oldTask = this.todoStore.getTaskById(task.id);
+
+    if (!oldTask || oldTask.status === newStatus) {
+      return;
+    }
+
+    const oldStatus = oldTask.status;
 
     forkJoin([
       this.todoStore.changeTaskOrder([...previousTasks, ...currentTasks]),
-
       this.todoStore.changeTaskStatus(task.id, newStatus),
     ])
       .pipe(take(1))
       .subscribe({
         next: () => {
+          this.taskHistoryStore
+            .addHistory(task.id, 'status_changed', {
+              oldStatus,
+              newStatus,
+            })
+            .pipe(take(1))
+            .subscribe({
+              error: (error) => {
+                console.error(error);
+                this.toastService.showToast('Failed to save task history!');
+              },
+            });
+
           this.toastService.showToast($localize`:@@taskOrderUpdated:Task order updated!`);
         },
-        error: () => {
+        error: (error) => {
+          console.error(error);
           this.toastService.showToast(
             $localize`:@@taskOrderUpdateError:Failed to update task order!`,
           );
-          // this.supabase.reloadTasks().pipe(take(1)).subscribe();
         },
       });
   }

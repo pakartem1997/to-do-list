@@ -1,33 +1,30 @@
-import { computed, inject, Service, signal } from '@angular/core';
+import { inject, Service } from '@angular/core';
 import { Supabase } from './supabase';
-import { User } from '@supabase/supabase-js';
+import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
+import { from, Observable } from 'rxjs';
 
 @Service()
 export class UserService {
-  private supabase = inject(Supabase).client;
+  private readonly supabase = inject(Supabase).client;
 
-  readonly user = signal<User | null>(null);
-  readonly userId = computed(() => this.user()?.id ?? null);
+  getUser(): Observable<User | null> {
+    return from(
+      this.supabase.auth.getUser().then(({ data, error }) => {
+        if (error) {
+          throw error;
+        }
 
-  displayName = computed(() => this.user()?.user_metadata?.['display_name'] ?? this.user()?.email);
-
-  readonly isAuthenticated = computed(() => this.user() !== null);
-
-  constructor() {
-    this.init();
+        return data.user;
+      }),
+    );
   }
 
-  private async init() {
-    const { data, error } = await this.supabase.auth.getUser();
-
-    if (error) {
-      throw new Error('Произошла ошибка');
-    }
-
-    this.user.set(data.user);
-
-    this.supabase.auth.onAuthStateChange((_event, session) => {
-      this.user.set(session?.user ?? null);
+  authStateChanges(): Observable<{ event: AuthChangeEvent; session: Session | null }> {
+    return new Observable((subscriber) => {
+      const { data } = this.supabase.auth.onAuthStateChange((event, session) => {
+        subscriber.next({ event, session });
+      });
+      return () => data.subscription.unsubscribe();
     });
   }
 }

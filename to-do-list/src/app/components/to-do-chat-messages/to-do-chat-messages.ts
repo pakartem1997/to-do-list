@@ -15,7 +15,6 @@ export class ToDoChatMessages {
   delete = output<number>();
 
   clickDelete(idMessage: number) {
-    console.log(idMessage);
     this.delete.emit(idMessage);
   }
 }

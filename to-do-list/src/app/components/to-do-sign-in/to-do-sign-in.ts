@@ -12,6 +12,7 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput, MatSuffix } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 @Component({
   selector: 'app-to-do-sign-in',
   imports: [
@@ -34,8 +35,9 @@ import { AuthService } from '../../services/auth';
   styleUrl: './to-do-sign-in.css',
 })
 export class ToDoSignIn {
-  readonly dialogRef = inject(MatDialogRef<ToDoSignIn>);
-  private authService = inject(AuthService);
+  private readonly dialogRef = inject(MatDialogRef<ToDoSignIn>);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   model = {
     email: '',
@@ -54,15 +56,14 @@ export class ToDoSignIn {
     const email = this.model.email.trim();
     const password = this.model.password.trim();
 
-    const { data, error } = await this.authService.signIn(email, password);
+    const { error } = await this.authService.signIn(email, password);
 
     if (error) {
-      console.error('Ошибка регистрации:', error);
+      this.toastService.showToast('Sign in failed!');
       return;
     }
 
-    console.log('Пользователь зарегистрирован:', data.user);
-
+    this.toastService.showToast('Signed in successfully!');
     this.dialogRef.close();
   }
 }

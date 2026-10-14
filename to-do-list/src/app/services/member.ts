@@ -54,7 +54,17 @@ export class MemberService {
     );
   }
 
-  removeMember(id: number) {
-    return from(this.supabase.from('task_members').delete().eq('id', id));
+  removeMember(id: number): Observable<void> {
+    return from(
+      this.supabase
+        .from('task_members')
+        .delete()
+        .eq('id', id)
+        .then(({ error }) => {
+          if (error) {
+            throw error;
+          }
+        }),
+    );
   }
 }

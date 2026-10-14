@@ -11,7 +11,8 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { TaskMember } from '../../interfaces/roles.interface';
 import { ProfileService } from '../../services/profile';
 import { Profile } from '../../interfaces/profile.interface';
-import { UserService } from '../../services/user';
+import { UserStore } from '../../services/user-store';
+import { TaskHistoryStore } from '../../services/task-history-store';
 
 @Component({
   selector: 'app-to-do-create-item',
@@ -31,13 +32,14 @@ export class ToDoCreateItem implements OnInit {
   private readonly todoStore = inject(TodoStore);
   private readonly toastService = inject(ToastService);
   private readonly profileService = inject(ProfileService);
-  private readonly userService = inject(UserService);
+  private readonly userStore = inject(UserStore);
+  private readonly taskHistoryStore = inject(TaskHistoryStore);
 
   users = signal<Profile[]>([]);
 
   constructor() {
     effect(() => {
-      const user = this.userService.user();
+      const user = this.userStore.user();
 
       if (user) {
         this.model.task_members[0].user_id = user.id;
@@ -56,10 +58,10 @@ export class ToDoCreateItem implements OnInit {
       .subscribe({
         next: (data) => {
           this.users.set(data);
+          this.toastService.showToast('Users loaded successfully!');
         },
-
-        error: (error) => {
-          console.error(error);
+        error: () => {
+          this.toastService.showToast('Failed to load users!');
         },
       });
   }
@@ -94,10 +96,12 @@ export class ToDoCreateItem implements OnInit {
       role: null,
       user_id: null,
     });
+    this.toastService.showToast('Member added successfully!');
   }
 
   removeRole(index: number): void {
     this.model.task_members.splice(index, 1);
+    this.toastService.showToast('Member removed successfully!');
   }
 
   addTask(): void {
@@ -109,8 +113,18 @@ export class ToDoCreateItem implements OnInit {
       .addTask(title, description, task_members)
       .pipe(take(1))
       .subscribe({
-        next: () => {
+        next: (task) => {
           this.toastService.showToast($localize`:@@taskAdded:Task added!`);
+          this.taskHistoryStore
+            .addHistory(task.id, 'task_created', {
+              title: task.text,
+              description,
+              createdAt: new Date().toISOString(),
+            })
+            .pipe(take(1))
+            .subscribe({
+              error: (error) => console.error(error),
+            });
         },
 
         error: (error) => {

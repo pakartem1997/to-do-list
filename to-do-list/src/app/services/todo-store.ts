@@ -21,11 +21,14 @@ export class TodoStore {
 
     return this.tasksService.getTasks().pipe(
       tap((tasks) => {
-        // console.log(tasks);
         this.tasksSignal.set(tasks);
       }),
       finalize(() => this.isSignalLoading.set(false)),
     );
+  }
+
+  getTaskById(id: number): Task | null {
+    return this.tasksSignal().find((task) => task.id === id) ?? null;
   }
 
   addTask(
@@ -103,12 +106,4 @@ export class TodoStore {
       }),
     );
   }
-
-  // reloadTasks(): Observable<Task[]> {
-  //   return this.todoApi.getTasks().pipe(
-  //     tap((tasks) => {
-  //       this.tasksSignal.set(tasks);
-  //     }),
-  //   );
-  // }
 }

@@ -2,9 +2,9 @@
   @if (displayName(); as displayName) {
     <app-to-do-user-avatar [name]="displayName" />
     <span>{{ displayName }}</span>
-    <button matButton (click)="logout()">Выйти</button>
+    <button matButton (click)="logout()">Exit</button>
   } @else {
-    <button mat-button type="button" (click)="openLogin()">Войти</button>
-    <button mat-flat-button type="button" (click)="openRegistration()">Регистрация</button>
+    <button mat-button type="button" (click)="openLogin()">Login</button>
+    <button mat-flat-button type="button" (click)="openRegistration()">Registration</button>
   }
 </div>

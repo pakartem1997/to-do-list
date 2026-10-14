@@ -7,8 +7,8 @@ import { Component, computed, input } from '@angular/core';
   styleUrl: './to-do-user-avatar.css',
 })
 export class ToDoUserAvatar {
-  imageUrl = input<string>();
-  name = input<string>('');
+  imageUrl = input<string>('');
+  name = input<string>('unknown');
 
   avatarColor = computed(() => {
     const colors = [

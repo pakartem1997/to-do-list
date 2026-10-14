@@ -7,6 +7,7 @@ import { ToDoErrorState } from '../to-do-error-state/to-do-error-state';
 import { ToastService } from '../../services/toast';
 import { TodoStatus } from '../../type/todo-status.type';
 import { TodoStore } from '../../services/todo-store';
+import { TaskHistoryStore } from '../../services/task-history-store';
 
 @Component({
   selector: 'app-to-do-item-view-wrapper',
@@ -18,6 +19,7 @@ export class ToDoItemViewWrapper {
   private readonly route = inject(ActivatedRoute);
   private readonly todoStore = inject(TodoStore);
   private readonly toastService = inject(ToastService);
+  private readonly taskHistoryStore = inject(TaskHistoryStore);
 
   readonly tasks = this.todoStore.tasks;
 
@@ -50,19 +52,44 @@ export class ToDoItemViewWrapper {
   });
 
   onStatusChange(id: number, checked: boolean): void {
+    const task = this.todoStore.getTaskById(id);
     const newStatus: TodoStatus = checked ? 'Completed' : 'InProgress';
+
+    if (!task || task.status === newStatus) {
+      return;
+    }
+
+    const oldStatus = task.status;
 
     this.todoStore
       .changeTaskStatus(id, newStatus)
       .pipe(take(1))
       .subscribe({
-        next: () =>
+        next: () => {
+          this.taskHistoryStore
+            .addHistory(id, 'status_changed', {
+              oldStatus,
+              newStatus,
+            })
+            .pipe(take(1))
+            .subscribe({
+              error: () => {
+                this.toastService.showToast('Failed to save task history!');
+              },
+            });
+
           this.toastService.showToast(
             newStatus === 'Completed'
               ? $localize`:@@taskCompleted:Task completed!`
               : $localize`:@@taskReturnedToProgress:Task returned to progress!`,
-          ),
-        error: () => console.log('error'),
+          );
+        },
+        error: (error) => {
+          console.error(error);
+          this.toastService.showToast(
+            $localize`:@@statusUpdateError:Failed to update task status!`,
+          );
+        },
       });
   }
 }

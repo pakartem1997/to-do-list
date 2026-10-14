@@ -5,6 +5,7 @@
       routerLinkActive="selected"
       [routerLink]="['/myTasks', task.id]"
       [task]="task"
+      [members]="membersByTask()[task.id]"
       (statusChange)="changeStatus(task.id, $event)"
     ></li>
   }

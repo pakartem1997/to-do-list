@@ -15,6 +15,7 @@ import { Roles, ROLES } from '../../constants/roles.constants';
 import { Profile } from '../../interfaces/profile.interface';
 import { AddMemberEvent } from '../../interfaces/AddMemberEvent.interface';
 import { TaskMemberWithProfile } from '../../type/taskMemberWithProfile.type';
+import { TaskHistory } from '../../interfaces/taskHistory.interface';
 
 @Component({
   selector: 'app-to-do-task-info',
@@ -38,6 +39,7 @@ export class ToDoTaskInfo {
   task = input.required<Task>();
   members = input.required<TaskMemberWithProfile[]>();
   users = input.required<Profile[]>();
+  history = input.required<TaskHistory[]>();
 
   isEdit = signal(false);
   selectedStatus = signal<TodoStatus | null>(null);

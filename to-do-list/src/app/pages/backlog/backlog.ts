@@ -10,6 +10,7 @@ import { MatSelect, MatOption } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { TodoStore } from '../../services/todo-store';
 import { take } from 'rxjs';
+import { TaskHistoryStore } from '../../services/task-history-store';
 
 @Component({
   selector: 'app-backlog',
@@ -31,6 +32,7 @@ import { take } from 'rxjs';
 export class Backlog implements OnInit {
   private readonly todoStore = inject(TodoStore);
   private readonly toastService = inject(ToastService);
+  private readonly taskHistoryStore = inject(TaskHistoryStore);
 
   selectedStatus = signal<TodoStatus | null>(null);
 
@@ -77,13 +79,32 @@ export class Backlog implements OnInit {
       });
   }
 
-  changeStatus(id: number, status: TodoStatus) {
+  changeStatus(taskId: number, status: TodoStatus): void {
+    const task = this.todoStore.getTaskById(taskId);
+
+    if (!task || task.status === status) {
+      return;
+    }
+
+    const oldStatus = task.status;
+
     this.todoStore
-      .changeTaskStatus(id, status)
+      .changeTaskStatus(taskId, status)
       .pipe(take(1))
       .subscribe({
         next: () => {
-          this.toastService.showToast($localize`:@@statusUpdated:Status updated!`);
+          this.taskHistoryStore
+            .addHistory(taskId, 'status_changed', {
+              oldStatus,
+              newStatus: status,
+            })
+            .pipe(take(1))
+            .subscribe({
+              error: () => {
+                this.toastService.showToast('Failed to save task history!');
+              },
+            });
+
           this.toastService.showToast(
             status === 'Completed'
               ? $localize`:@@taskCompleted:Task completed!`
@@ -91,7 +112,6 @@ export class Backlog implements OnInit {
           );
         },
         error: () => {
-          // this.supabase.reloadTasks().subscribe();
           this.toastService.showToast(
             $localize`:@@statusUpdateError:Failed to update task status!`,
           );

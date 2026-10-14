@@ -49,9 +49,9 @@
         <span class="task-meta-label">Created</span>
       </div>
 
-      <span class="created-date">
+      <time class="created-date">
         {{ task().created_at | date: 'dd.MM.yyyy HH:mm' }}
-      </span>
+      </time>
     </div>
   </div>
 
@@ -110,5 +110,36 @@
         </div>
       }
     </div>
+  </div>
+
+  <div class="history">
+    <div class="history-header">
+      <div class="history-title-wrapper">
+        <span class="history-title">Log</span>
+        <span class="history-count">{{ history().length }}</span>
+      </div>
+    </div>
+
+    @for (item of history(); track item.id) {
+      <div class="history-item">
+        <span> {{ item.action }}</span>
+        <div>
+          <app-to-do-user-avatar
+            [imageUrl]="item.profile?.avatar_url ?? ''"
+            [name]="item.profile?.username ?? ''"
+          />
+          {{ item.profile?.username }}
+        </div>
+        <time><mat-icon>schedule</mat-icon> {{ item.created_at | date: 'dd.MM.yyyy HH:mm' }}</time>
+
+        @if (item.action === 'status_changed') {
+          <p>
+            {{ item.details['oldStatus'] }}
+            →
+            {{ item.details['newStatus'] }}
+          </p>
+        }
+      </div>
+    }
   </div>
 </div>

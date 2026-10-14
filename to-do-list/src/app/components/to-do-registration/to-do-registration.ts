@@ -12,6 +12,7 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput, MatSuffix } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth';
+import { ToastService } from '../../services/toast';
 
 @Component({
   selector: 'app-to-do-registration',
@@ -37,6 +38,7 @@ import { AuthService } from '../../services/auth';
 export class ToDoRegistration {
   readonly dialogRef = inject(MatDialogRef<ToDoRegistration>);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   model = {
     email: '',
@@ -56,15 +58,14 @@ export class ToDoRegistration {
     const password = this.model.password.trim();
     const username = this.model.username.trim();
 
-    const { data, error } = await this.authService.signUp(email, password, username);
+    const { error } = await this.authService.signUp(email, password, username);
 
     if (error) {
-      console.error('Ошибка регистрации:', error);
+      this.toastService.showToast('Registration failed!');
       return;
     }
 
-    console.log('Пользователь зарегистрирован:', data.user);
-
+    this.toastService.showToast('Registration successful!');
     this.dialogRef.close();
   }
 }
